@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <string_view>
+#include <vector>
 
 class wav {
 private:
@@ -20,10 +21,14 @@ private:
 		char     subchunk2ID[4];
 		uint32_t subchunk2Size;
 	};
+	header hdr;
+	std::vector<float> samples;
+	bool fail;
 
 public:
-	wav(const std::string& filename);
+	wav();
 	~wav();
 
-	header setFields(const std::string& filename);
+	void load(const std::string& filename);
+	bool ok();
 };
