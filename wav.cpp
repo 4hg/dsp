@@ -1,26 +1,30 @@
 #include "wav.h"
 
-wav::wav(const std::string filename) {
+wav::wav(const std::string& filename) {
 	setFields(filename);
 }
 
 wav::~wav() {}
 
-void wav::setFields(const std::string filename) {
+wav::header wav::setFields(const std::string& filename) {
 	std::ifstream file(filename, std::fstream::binary);
-	char* buff;
-	int length = 0;
+	header hdr{};
 
-	if (file.is_open()) {
-		file.seekg(0, file.end);
-		length = file.tellg();
-		buff = new char[length];
-		file.seekg(0, file.beg);
-		file.read(buff, length);
+	if (file.fail())
+		throw std::runtime_error("Could not open file.");
+	
+	file.read((char*)&hdr, 44);
 
-		// do fancy work here
-		std::cout << length;
-		file.close();
-		delete[] buff;
+	if (hdr.chunkID[3] == 'X') {
+		std::cout << "BE byte ordering not supported.\n";
+		exit(0);
 	}
+
+	if (hdr.audioFormat != 1) {
+		std::cout << "Non-PCM files not supported.\n";
+		exit(0);
+	}
+
+	file.close();
+	return hdr;
 }
