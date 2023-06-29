@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <string_view>
@@ -31,5 +32,8 @@ public:
 
 	void read(const std::string& filename);
 	void write(const std::string& filename);
+
+	void volume(float m);
+
 	bool ok();
 };

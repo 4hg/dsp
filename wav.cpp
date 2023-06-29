@@ -50,15 +50,14 @@ void wav::read(const std::string& filename) {
 	int length = hdr.subchunk2Size / sampleSize;
 	
 	samples.reserve(length);
-	for (int i = 0; i < length; i += sampleSize) {
+	for (int i = 0; i < hdr.subchunk2Size; i += sampleSize) {
 		// pcm16le
 		int16_t sample = 0;
 		for (int j = 0; j < sampleSize; j++) {
 			sample |= temp[i + j] << j * 8;
 		}
-		// s / 32768
-		float s = (float)sample / (1 << hdr.bitsPerSample - 1);
-		samples.push_back(s);
+		// sample / 32768
+		samples.push_back((float)sample / (1 << hdr.bitsPerSample - 1));
 	}
 
 	file.close();
@@ -71,12 +70,18 @@ void wav::write(const std::string& filename) {
 	std::vector<int16_t> temp;
 	temp.reserve(samples.size());
 
-	for (float s : samples) {
+	for (float &s : samples) {
 		temp.push_back((int16_t)(s * 32768));
 	}
 
 	file.write((char*)temp.data(), hdr.subchunk2Size);
 	file.close();
+}
+
+void wav::volume(float m) {
+	for (float &s : samples) {
+		s = std::clamp(s * m, -1.0f, 1.0f);
+	}
 }
 
 bool wav::ok() {

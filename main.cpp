@@ -7,6 +7,7 @@ int main() {
 	if (!w.ok())
 		return 1;
 
+	w.volume(4.0f);
 	w.write("audio/test.wav");
 	return 0;
 }
