@@ -29,6 +29,7 @@ public:
 	wav();
 	~wav();
 
-	void load(const std::string& filename);
+	void read(const std::string& filename);
+	void write(const std::string& filename);
 	bool ok();
 };

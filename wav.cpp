@@ -7,11 +7,14 @@ wav::wav()
 {}
 wav::~wav() {}
 
-void wav::load(const std::string& filename) {
+void wav::read(const std::string& filename) {
 	std::ifstream file(filename, std::fstream::binary);
 
 	if (file.fail()) {
+		std::cerr << "File failed to open.\n";
 		fail = true;
+		file.close();
+		return;
 	}
 
 	// read to audioFormat
@@ -27,29 +30,52 @@ void wav::load(const std::string& filename) {
 	if (hdr.chunkID[3] == 'X') {
 		std::cerr << "BE byte ordering not supported.\n";
 		fail = true;
+	} else if (hdr.numChannels > 2) {
+		std::cerr << "WAVE only has support for mono and stereo\n";
+		fail = true;
+	} else if (hdr.bitsPerSample != 16) {
+		std::cerr << "Only pcm16le is supported.\n";
+		fail = true;
+	}
+
+	if (fail) {
+		file.close();
+		return;
 	}
 
 	std::vector<uint8_t> temp(hdr.subchunk2Size);
 	file.read((char*)temp.data(), hdr.subchunk2Size);
 
-	if (hdr.numChannels > 2) {
-		std::cerr << "WAVE only has support for mono and stereo\n";
-		fail = true;
-	}
-
-	int sampleSize = hdr.bitsPerSample / 8;
+	int sampleSize = hdr.bitsPerSample / 8; // 2
 	int length = hdr.subchunk2Size / sampleSize;
-
-	samples.resize(length);
+	
+	samples.reserve(length);
 	for (int i = 0; i < length; i += sampleSize) {
-		uint32_t sample = 0;
+		// pcm16le
+		int16_t sample = 0;
 		for (int j = 0; j < sampleSize; j++) {
-			sample |= temp[i + j] << j * 8; 
+			sample |= temp[i + j] << j * 8;
 		}
+		// s / 32768
 		float s = (float)sample / (1 << hdr.bitsPerSample - 1);
 		samples.push_back(s);
 	}
 
+	file.close();
+}
+
+void wav::write(const std::string& filename) {
+	std::ofstream file(filename, std::fstream::binary);
+	file.write((char*)&hdr, 44);
+
+	std::vector<int16_t> temp;
+	temp.reserve(samples.size());
+
+	for (float s : samples) {
+		temp.push_back((int16_t)(s * 32768));
+	}
+
+	file.write((char*)temp.data(), hdr.subchunk2Size);
 	file.close();
 }
 

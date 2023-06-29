@@ -2,10 +2,11 @@
 
 int main() {
 	wav w;
-	w.load("../../audio/440.wav");
+	w.read("audio/440.wav");
 
 	if (!w.ok())
 		return 1;
 
+	w.write("audio/test.wav");
 	return 0;
 }
