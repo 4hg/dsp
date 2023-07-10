@@ -2,12 +2,12 @@
 
 int main() {
 	wav w;
-	w.read("audio/440.wav");
+	w.read("audio/snare.wav");
 
 	if (!w.ok())
 		return 1;
 
-	w.volume(4.0f);
-	w.write("audio/test.wav");
+	
+	w.write2("audio/test.wav", w.delay(1.0f, 0.25f));
 	return 0;
 }

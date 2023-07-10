@@ -24,6 +24,8 @@ private:
 	};
 	header hdr;
 	std::vector<float> samples;
+	// maximum volume multiplier
+	float mm;
 	bool fail;
 
 public:
@@ -32,8 +34,9 @@ public:
 
 	void read(const std::string& filename);
 	void write(const std::string& filename);
+	void write2(const std::string& filename, std::vector<float> data);
 
-	void volume(float m);
-
+	void volume(float multiplier);
+	std::vector<float> delay(float delay, float delayGain);
 	bool ok();
 };
